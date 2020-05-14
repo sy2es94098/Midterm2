@@ -21,28 +21,21 @@ def ml_loop(side: str):
 
     # === Here is the execution order of the loop === #
     # 1. Put the initialization code here
-    ball_served = False
     def move_to(player, pred) : #move platform to predicted position to catch ball 
         if player == '1P':
-            if scene_info["platform_1P"][0]+20  > (pred-3) and scene_info["platform_1P"][0]+20 < (pred+3): return 0 # NONE
-            elif scene_info["platform_1P"][0]+20 <= (pred-3) : return 1 # goes right
+            if scene_info["platform_1P"][0]+20  > (pred-10) and scene_info["platform_1P"][0]+20 < (pred+10): return 0 # NONE
+            elif scene_info["platform_1P"][0]+20 <= (pred-10) : return 1 # goes right
             else : return 2 # goes left
         else :
-            if scene_info["platform_2P"][0]+20  > (pred-3) and scene_info["platform_2P"][0]+20 < (pred+3): return 0 # NONE
-            elif scene_info["platform_2P"][0]+20 <= (pred-3) : return 1 # goes right
+            if scene_info["platform_2P"][0]+20  > (pred-10) and scene_info["platform_2P"][0]+20 < (pred+10): return 0 # NONE
+            elif scene_info["platform_2P"][0]+20 <= (pred-10) : return 1 # goes right
             else : return 2 # goes left
 
     def ml_loop_for_1P(): 
         if scene_info["ball_speed"][1] > 0 : # 球正在向下 # ball goes down
             x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
-            res = 100 -(scene_info["frame"] % 100) + 1 #res times ago will occur speed change
-            if res > x :
-                pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
-            else:
-                pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)+(x - res)
+            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
             bound = pred // 200 # Determine if it is beyond the boundary
-            #print("1P predict " +str(pred))
-            #print("1P bound " +str(bound))
             if (bound > 0): # pred > 200 # fix landing position
                 if (bound%2 == 0) : 
                     pred = pred - bound*200                    
@@ -53,30 +46,18 @@ def ml_loop(side: str):
                     pred = abs(pred - (bound+1) *200)
                 else :
                     pred = pred + (abs(bound)*200)
-            #print("result " + str(pred))
             return move_to(player = '1P',pred = pred)
         else : # 球正在向上 # ball goes up
-            if scene_info["platform_1P"][0]+20 < 50 or  scene_info["platform_1P"][0]+20 > 150:
-                return move_to(player = '1P',pred = 100)
-            else:
-                return move_to(player = '1P',pred = scene_info["ball"][0])
-
+            return move_to(player = '1P',pred = 100)
 
 
 
     def ml_loop_for_2P():  # as same as 1P
         if scene_info["ball_speed"][1] > 0 : 
-            if scene_info["platform_2P"][0]+20 < 50 or  scene_info["platform_2P"][0]+20 > 150:
-                return move_to(player = '2P',pred = 100)
-            else:
-                return move_to(player = '2P',pred = scene_info["ball"][0])
+            return move_to(player = '2P',pred = 100)
         else : 
             x = ( scene_info["platform_2P"][1]+30-scene_info["ball"][1] ) // scene_info["ball_speed"][1] 
-            res = 100 -(scene_info["frame"] % 100) + 1 #res times ago will occur speed change
-            if res > x :
-                pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
-            else:
-                pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)+(x - res)
+            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x) 
             bound = pred // 200 
             if (bound > 0):
                 if (bound%2 == 0):
@@ -117,6 +98,7 @@ def ml_loop(side: str):
 
         if side == "1P":
             command = ml_loop_for_1P()
+
 
         if command == 0:
             comm.send_to_game({"frame": scene_info["frame"], "command": "NONE"})
