@@ -117,8 +117,6 @@ def ml_loop(side: str):
 
         if side == "1P":
             command = ml_loop_for_1P()
-        else:
-            command = ml_loop_for_2P()
 
         if command == 0:
             comm.send_to_game({"frame": scene_info["frame"], "command": "NONE"})
